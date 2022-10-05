@@ -27,6 +27,11 @@ services:
   backend:
     <<: *base-app
     container_name: backend
+    command: >
+      sh -c "
+      python /app/manage.py migrate  &&
+      python /app/manage.py runserver 0.0.0.0:8000
+      "
     healthcheck:
       test: curl http://0.0.0.0:8000/ || exit 1
       interval: 1m30s
@@ -35,8 +40,11 @@ services:
       start_period: 30s
     depends_on:
       - "db"
+    ports:
+      - "${DOCKER_BACKEND_PORT_FORWARD:-0.0.0.0:8000}:${PORT:-8000}"
   db:
     image: postgres:14.5-bullseye
+    container_name: postgres_db
     deploy:
       resources:
         limits:
