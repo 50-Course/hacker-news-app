@@ -1,0 +1,61 @@
+##############
+# Docker Compose File
+# Maintainer: Eri Adeodu (@50-Course)
+# License: MIT License.
+#
+# Reference links:
+# incase you feeling adventerous,
+#   - https://docs.docker.com/compose/compose-file/
+#   - https://nickjanetakis.com/blog/best-practices-around-production-ready-web-apps-with-docker-compose
+#   - https://https://hackmamba.io/blog/2022/09/best-practices-when-using-docker-compose/
+##############
+x-app: &base-app
+  build:
+    context: .
+    args:
+      - "UID=${UID:-1000}"
+      - "GID=${GID:-1000}"
+  depends_on:
+  env_file:
+    - ".env"
+  restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+  tty: true
+  volumes:
+    - "${DOCKER_MOUNTED_VOLUME:-./public_sda:/app/public_sda}"
+
+services:
+  backend:
+    <<: *base-app
+    container_name: backend
+    command: >
+      sh -c "
+      python /app/manage.py migrate  &&
+      python /app/manage.py runserver 0.0.0.0:8000
+      "
+    healthcheck:
+      test: curl http://0.0.0.0:8000/ || exit 1
+      interval: 1m30s
+      timeout: 40s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - "db"
+    ports:
+      - "${DOCKER_BACKEND_PORT_FORWARD:-0.0.0.0:8000}:${PORT:-8000}"
+  db:
+    image: postgres:14.5-bullseye
+    container_name: postgres_db
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_MAX_ALLOWED_CPUS:-0}"
+          memory: "${DOCKER_MAX_ALLOWED_MEMORY:-0}"
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    volumes:
+      - "db:/var/lib/postgresql/data"
+
+volumes:
+  db: {}
