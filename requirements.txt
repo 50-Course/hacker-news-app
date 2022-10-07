@@ -3,5 +3,7 @@ djangorestframework
 whitenoise
 gunicorn
 drf-yasg
-psycopg
+psycopg2-binary
 django-environ
+django-extensions
+pre-commit

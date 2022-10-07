@@ -1,27 +1,10 @@
+from __future__ import annotations
+
 from django.contrib import admin
 
-from api.models import models
+from api.models import models as m
 
-@admin.register(models.Base):
-class BaseAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(models.Job)
-class JobAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(models.Comment)
-class CommentAdmin(admin.TabularInline):
-    pass
-
-@admin.register(models.Story)
-class StoryAdmin(admin.TabularInline):
-    pass
-
-@admin.register(models.Poll)
-class PollsAdmin(admin.TabularInline):
-    pass
-
-@admin.register(models.Polls)
-class PollOPTAdmin(admin.TabularInline):
-    pass
+# type: ignore
+models = [m.Story, m.Comment, m.Poll, m.PollOption]
+# type: ignore
+admin.site.register(_ for _ in models)
