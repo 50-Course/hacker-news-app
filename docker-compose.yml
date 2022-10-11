@@ -28,7 +28,10 @@ services:
     container_name: backend-app
     command: >
       sh -c "
+      python /app/manage.py makemigrations api &&
+      python /app/manage.py makemigrations &&
       python /app/manage.py migrate  &&
+      python /app/manage.py collectstatic &&
       python /app/manage.py runserver 0.0.0.0:8000
       "
     healthcheck:
@@ -39,6 +42,7 @@ services:
       start_period: 30s
     depends_on:
       - db
+      - redis
     ports:
       - "8000:8000"
   db:
@@ -54,6 +58,18 @@ services:
       - 5432
     volumes:
       - "db:/var/lib/postgresql/data"
+
+  celery:
+    build:
+      context: .
+    command: celery -A core worker -B -l info
+    depends_on:
+      - backend
+      - redis
+
+
+  redis:
+    image: redis:6-alpine
 
 volumes:
   db: {}
