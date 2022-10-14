@@ -1,0 +1,41 @@
+{% extends '_base.html' %}
+
+{% block navbar %}
+    {% include 'nav_bar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+{% autoescape off %}
+    {% if news %}
+        <div class="container-m-md-auto">
+            <div class="text-headline">
+                <h1 class="text text-md-start"> Top Stories for you 😉</h1>
+            </div>
+                <!-- Display Stories -->
+                {% include 'extras.html' %}
+                <!-- End of Display Stories -->
+
+                {% endfor %}
+
+                <!-- Paagination -->
+                {% include '_pagination.html' %}
+                <!-- End of Pagination-->
+            </div>
+
+    {% else %}
+        <div class="container">
+            <div class="jumbotron justify-content-center ">
+                <div class="jumbotron text-capitalize f-headline-m">
+                    <h2 class='text-lg-center light-blue hover-bg-blue'>
+                        Oops! We do not have any data to display at this time!
+                    </h2>
+                    <p class='text-md-center text-decoration-underline text-link-warning'>
+                        <span class="text-center"> Please reload the page, we will update soon.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% endautoescape %}
+{% endblock content %}

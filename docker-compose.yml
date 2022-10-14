@@ -15,7 +15,6 @@ x-app: &base-app
     args:
       - "UID=${UID:-1000}"
       - "GID=${GID:-1000}"
-  depends_on:
   env_file:
     - ".env"
   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
@@ -26,10 +25,13 @@ x-app: &base-app
 services:
   backend:
     <<: *base-app
-    container_name: backend
+    container_name: backend-app
     command: >
       sh -c "
+      python /app/manage.py makemigrations api &&
+      python /app/manage.py makemigrations &&
       python /app/manage.py migrate  &&
+      python /app/manage.py collectstatic &&
       python /app/manage.py runserver 0.0.0.0:8000
       "
     healthcheck:
@@ -39,23 +41,35 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
-      - "db"
+      - db
+      - redis
     ports:
-      - "${DOCKER_BACKEND_PORT_FORWARD:-0.0.0.0:8000}:${PORT:-8000}"
+      - "8000:8000"
   db:
     image: postgres:14.5-bullseye
-    container_name: postgres_db
+    container_name: main_db
     deploy:
       resources:
         limits:
           cpus: "${DOCKER_MAX_ALLOWED_CPUS:-0}"
           memory: "${DOCKER_MAX_ALLOWED_MEMORY:-0}"
-    environment:
-      POSTGRES_USER: "${DB_USER}"
-      POSTGRES_PASSWORD: "${DB_PASSWORD}"
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    ports:
+      - 5432
     volumes:
       - "db:/var/lib/postgresql/data"
+
+  celery:
+    build:
+      context: .
+    command: celery -A core worker -B -l info
+    depends_on:
+      - backend
+      - redis
+
+
+  redis:
+    image: redis:6-alpine
 
 volumes:
   db: {}

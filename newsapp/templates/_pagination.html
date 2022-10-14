@@ -1,0 +1,21 @@
+{% block pagination %}
+{% if page_obj %}
+    <nav aria-label="page navigation">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1&filter={{page_filter}}">&laquo; 1</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&filter={{page_filter}}">previous</a></li>
+        {% endif %}
+
+        <li class="page-item page-link">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&filter={{page_filter}}">2</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&filter={{page_filter}}">last &raquo;</a></li>
+        {% endif %}
+    </ul>
+    </nav>
+{% endif %}
+{% endblock pagination %}
