@@ -1,6 +1,6 @@
 # HN News App 👽
 
-Backend API for Hacker News. Written in Django, for `QuickCheck` Backend Software Engineer Position.
+Backend API for Hacker News. Written in Django.
 
 
 
